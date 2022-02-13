@@ -2,4 +2,4 @@
 ![header](./images/header.png)
 
 ## Contents
-- [BIP 324](./1-BIP324.pdf)
+- [BIP 324](./bip324.md)
