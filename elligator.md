@@ -5,7 +5,7 @@
 - **Index:**
     - [Need](#need)
     - [History](#history)
-    - [Mental Models](#mental-models)
+    - [Introduction](#introduction)
     - [Elligator](#elligator)
     - [Elligator Squared](#elligator-squared)
     - [Elligator Swift](#elligator-swift)
@@ -24,18 +24,11 @@ deterministic method of constructing rational points on elliptic curves. Shallue
 simplify Skałba’s construction, giving concretely efficient rational maps to essentially any elliptic curve.
 But it's still very costly.
 
-## Mental Models
-Elligator, Elligator Squared and Elligator Swift can be easily understood by thinking of maps and constructions
-separately.
-
-1. Mapping function(forward, reverse):
-    - These functions map field elements to a group element and vice versa. They form forward maps and reverse maps
-      respectively.
-    - Examples include: Elligator 1 map, Elligator 2 map, Shallue–van de Woestijne encoding, SwiftEC encoding
-2. Construction:
-    - This can be thought of as a construction which makes use of the maps to encode elliptic curve points to
-      bit strings and vice versa. They internally use mapping functions to achieve the result.
-    - Examples include: Elligator construction, Elligator Squared, Elligator Swift
+## Introduction
+Elligator, Elligator Squared and Elligator Swift consists of mapping function(forward, reverse) which map field elements
+to a group element and vice versa. They form forward maps and reverse maps respectively. Examples include: Elligator 1
+map, Elligator 2 map, Shallue–van de Woestijne encoding etc.. The constructions make use of the maps to encode elliptic
+curve points to bit strings and vice versa.
 
 ## Elligator
 ![Elligator](./images/elligator/4.jpg)
@@ -105,6 +98,11 @@ However, Elligator 1 is less widely applicable.
         - just do forward_map(u) + forward_map(v) = P
 
 * in secp256k1, field elements can be encoded as bytes directly and concatenated since field size is close to power of 2.
+
+###  How is infinity handled in Elligator Squared?
+* we need to handle infinity to make sure every input (u,v) can be decoded to an elliptic curve point P.
+* so we remap it to another point.
+![Elligator Squared infinity](./images/elligator/7.jpg)
 
 * Advantage:
     - All elliptic curve points are representable
