@@ -63,7 +63,6 @@ However, Elligator 1 is less widely applicable.
 * Curve requirements:
     -  any elliptic curve
 * Works on any points
-
 * Mapping:
     - choose mapping functions whose preimages are efficiently computable
     - for secp256k1(a BN curve), Shallue-van de Woestijne mapping function can be used
@@ -78,7 +77,7 @@ However, Elligator 1 is less widely applicable.
         - find all the preimages of P − f (v)
         - here are at most 4 such preimages.
         Then pick i ∈ {1, 2, 3, 4} at random and return the i-th preimage if it exists. Otherwise, start over with another v.
-    - read more about the Shallue-van de Woestijne mapping function here. # TODO: insert link
+    - read more about the Shallue-van de Woestijne mapping function [here](./shallue-van-de-woestijne.md).
 
 * Construction:
     - Representation (curve point -> fe, fe)
@@ -98,6 +97,8 @@ However, Elligator 1 is less widely applicable.
         - just do forward_map(u) + forward_map(v) = P
 
 * in secp256k1, field elements can be encoded as bytes directly and concatenated since field size is close to power of 2.
+* math proof: [link](./shallue-van-de-woestijne.md)
+* python code: [link](https://github.com/stratospher/python-cryptography/blob/master/ellsq.py)
 
 ###  How is infinity handled in Elligator Squared?
 * we need to handle infinity to make sure every input (u,v) can be decoded to an elliptic curve point P.
@@ -127,6 +128,9 @@ However, Elligator 1 is less widely applicable.
       - fully computing the underlying encoding in the forward direction becomes unnecessary saving many field exponentiations in the process.
       - TODO:
     - reverse map
+
+* math proof: [link](./swiftEC.md)
+* python code: [link](https://github.com/stratospher/python-cryptography/blob/master/ellswift.py)
     
 * Advantage:
     - indifferentiable hashing to most curves with a single exponentiation.
@@ -142,6 +146,8 @@ Elligator:
 
 Elligator Squared:
 1. https://github.com/sipa/writeups/tree/main/elligator-square-for-bn
+2. https://eprint.iacr.org/2014/043.pdf
+3. https://www.di.ens.fr/~fouque/pub/latincrypt12.pdf
 
 Elligator Swift:
 1. https://eprint.iacr.org/2022/759.pdf
