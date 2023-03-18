@@ -4,11 +4,12 @@
 ## Contents
 
 | index | topic                                                              | tag |
-| --- |--------------------------------------------------------------------| ----------- |
+| -- |--------------------------------------------------------------------| ----------- |
 | 1. | [BIP 324](./bip324.md)                                             | `bip324` `crypto` |
 | 2. | [Elligator, Elligator Squared and Elligator Swift](./elligator.md) | `bip324` `crypto` |
 | 3. | [Shallue–van de Woestijne encoding](./shallue-van-de-woestijne.md) | `math` `crypto` |
 | 4. | [Swift EC encoding](./swiftEC.md)                                  | `math` `crypto` |
 | 5. | [Bitcoin4India 2022 slides on BIP 324](./slides_BIP324.pdf)        | `bip324` `slides` |
 | 6. | [self advertisement](./self-advertisement.md)                      | `notes` `p2p` |
+| 7. | [bitcoin inquisition](./bitcoin-inquisition.md)                    | `consensus`|                                                              
 
