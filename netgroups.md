@@ -31,6 +31,7 @@ def get_group_ipv4(ip):
 print("ipv4", get_group_ipv4("1.2.3.4").hex()) # prints 010102
 # 01   = network class of ipv4
 # 0102 = first 2 bytes of ipv4 address
+# since 16 bits are variable, 2^16 possible netgroups
 ````
 ### 2. IPV6
 - IPV6 address is made of 8 chunks (16 bits/2 bytes each)
@@ -42,6 +43,7 @@ def get_group_ipv6(ip):
 print("ipv6", get_group_ipv6("2001:2001:9999:9999:9999:9999:9999:9999").hex()) # prints 0220012001
 # 02        = network class of ipv6
 # 20012001  = first 4 bytes of ipv6 address
+# since 32 bits are variable, 2^32 possible netgroups
 ```
 ### 3. Tor
 *Construction*
@@ -78,6 +80,7 @@ print("tor", get_group_tor("pg6mmjiyjmcrsslvykfwnntlaru7p5svn6y2ymmju6nubxndf4ps
 # 03        = network class of Tor
 # 7         = first 4 bits of Tor address
 # f         = last 4 bits is set to 1111 (only first 4 bits used in netgroup logic)
+# since 4 bits are variable, 2^4 possible netgroups
 ```
 ### 4. I2P
 - I2P addresses are also public key based addresses.
@@ -102,6 +105,7 @@ print("i2p", get_group_i2p("ukeu3k5oycgaauneqgtnvselmt4yemvoilkln7jpvamvfx7dnkdq
 # 04     = network class of I2P
 # a      = first 4 bits of I2P address
 # f      = last 4 bits is set to 1111 (only first 4 bits used in netgroup logic)
+# since 4 bits are variable, 2^4 possible netgroups
 ```
 ### 5. CJDNS
 - CJDNS addresses are also public key based addresses
@@ -117,6 +121,7 @@ print("cjdns", get_group_cjdns("fc4b:50:7661:cccd:8697:40a4:5498:c51c")) # print
 # 05     = network class of CJDNS
 # fc4    = first 12 bits of CJDNS address
 # f      = last 4 bits is set to 1111 (only first 12 bits used in netgroup logic)
+# since 4 bits are variable, 2^4 possible netgroups
 ```
 ## Bucketing algorithm in addrman
 
@@ -137,46 +142,27 @@ def get_new_bucket(key, addr, src):
 ```
 - new bucket selected is `hash2%1024`
 - so we need to compute `hash1%64` first which is then used to compute `hash2%1024`
-- `hash1` depends on `addr_group` and `src_group`
-- `hash2` depends on `hash1` and `src_group`
-- if IP address is:
-  1. IPV4/IPV6 address
-     - `addr_group` has 2**16 possibilities if IPV4 address (uses 1st 2 bytes/16 bits of IPV4 address)
-     - `addr_group` has 2**32 possibilities if IPV6 address (uses 1st 4 bytes/32 bits of IPV6 address)
-     - `hash1` depends on `addr_group` and `src_group`
-     - since 2 ** 16 and 2 ** 32 are anyways greater than 64, `hash1%64` could result in any of the 64 possibilities [0, 63]
-     - `hash2` depends on `hash1` and `src_group`
-     - if source of IP address is:
-       1. IPV4/IPV6 address
-          - `src_group` has 2**16 possibilities if IPV4 address (uses 1st 2 bytes/16 bits of IPV4 address)
-          - `src_group` has 2**32 possibilities if IPV6 address (uses 1st 4 bytes/32 bits of IPV6 address)
-          - since `hash2` depends on `hash1` and `src_group`, `hash2` would have 64 * (2 ** 16) and 64 * (2**32) possibilities respectively
-          - these are anyways greater than 1024, so `hash2%1024` could result in any of the 1024 possibilities [0, 1023]
-          - hence all 1024 buckets possible in new table
-       2. Tor/I2P/CJDNS address
-          - `src_group` has 2**4 possibilities (uses 4 bits from address which are variable)
-          - since `hash2` depends on `hash1` and `src_group`, `hash2` would have 64 * 2**4 possibilities
-          - this is equal to 1024, so `hash2%1024` could result in any of the 1024 possibilities [0, 1023]
-          - hence all 1024 buckets possible in new table
-  2. Tor/I2P/CJDNS address
-     - `addr_group` has 2**4 possibilities (uses 4 bits from address which are variable)
-     - `hash1` depends on `addr_group` and `src_group`
-     - if source of IP address is:
-       1. IPV4/IPV6 address
-          - `src_group` has 2 ** 16 possibilities if IPV4 address (uses 1st 2 bytes/16 bits of IPV4 address)
-          - `src_group` has 2 ** 32 possibilities if IPV6 address (uses 1st 4 bytes/32 bits of IPV6 address)
-          - since `hash1` depends on `addr_group` and `src_group`, `hash1` would have (2 ** 4) * (2 ** 16) and (2 ** 4) * (2 ** 32) possibilities respectively
-          - these are anyways greater than 64, `hash1%64` could result in any of the 64 possibilities [0, 63]
-          - since `hash2` depends on `hash1` and `src_group`, `hash2` would have 64 * (2 ** 16) and 64 * (2 ** 32) possibilities respectively
-          - these are anyways greater than 1024, so `hash2%1024` could result in any of the 1024 possibilities [0, 1023]
-          - hence all 1024 buckets possible in new table
-       2. Tor/I2P/CJDNS address
-          - src_group has `2**4` possibilities (uses 4 bits from address which are variable)
-          - since `hash1` depends on `addr_group` and `src_group`, `hash1` would have (2 ** 4) * (2 ** 4) possibilities
-          - these are anyways greater than 64, `hash1%64` could result in any of the 64 possibilities [0, 63]
-          - since `hash2` depends on `hash1` and `src_group`, `hash2` would have 64 * (2 ** 4) and 64 * (2 ** 4) possibilities respectively
-          - these are anyways greater than 1024, so `hash2%1024` could result in any of the 1024 possibilities [0, 1023]
-          - hence all 1024 buckets possible in new table
+- since double hashing is collision resistant, number of possible values for:
+    - `hash1` depends on number of unique combination of `addr_group` and `src_group`
+    - `hash2` depends on number of unique combination of `hash1%64` and `src_group`
+
+**_Steps to calculate number of possible new table buckets that can be filled_**: (used in table calculation below)
+   1. compute number of possible values for `addr_group`(netgroup of IP address) and `src_group`(netgroup of source of IP address)
+   2. number of possible values for `hash1` = number of possible values for `addr_group` * number of possible values for `src_group`
+   3. number of possible values for `hash1%64` = 64 (if number of possible values for `hash1` >= 64, this is what happens in all cases evaluated below)
+   4. since `src_group` is already chosen at this point, we calculate number of possible values for `hash1%64` for 1 `src_group`:
+      * = number of possible values for `addr_group`
+      * = 64 (if number of possible values for `addr_group` >= 64) (todo: note about how we limit dependent varai)
+   5. `hash2` depends on number of unique combination of `hash1%64` and `src_group`
+      * `src_group` has n possibilities
+      * `hash1%64` for 1 `src_group` has  (number of possible values for `hash1%64` for 1 `src_group`) possibilities (from step 3)
+      * `hash2` has n * (number of possible values for `hash1%64` for 1 `src_group`) possibilities
+   6. number of possible values for `hash2%1024` = 1024 (if number of possible values for `hash2` >= 1024, otherwise it is the original value of `hash2` itself)
+
+|                               | `src_group` is IPV4/IPV6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | `src_group` is Tor/I2P/CJDNS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `addr_group` is IPV4/IPV6     | <ol><li>`addr_group` is IPV4/IPV6 and `src_group` is IPV4/IPV6. Each has 2^16/2^32 possibilities based on IPV4/IPV6 address.</li><li>number of possible values for `hash1`<br>= number of possible values for `addr_group` * number of possible values for `src_group` (>=64)</li><li>number of possible values for `hash1%64` = 64</li><li>number of possible values for `hash1%64` for 1 `src_group`<br>= number of possible values for `addr_group`(this is >= 64) = 64</li><li>`hash2` depends on number of unique combination of `hash1%64` and `src_group`<br>= 64 * (2^16) or 64 * (2^32) (this is >= 1024)</li><li>number of possible values for `hash2%1024` = 1024</li><li>hence all 1024 buckets possible in new table</li></ol> | <ol><li>`addr_group` is IPV4/IPV6(2^16/2^32 possibilities based on IPV4/IPV6 address) and `src_group` is Tor/I2P/CJDNS (16 possibilities).</li><li>number of possible values for `hash1` <br>= number of possible values for `addr_group` * number of possible values for `src_group` (>=64)</li><li>number of possible values for `hash1%64` = 64</li><li>number of possible values for `hash1%64` for 1 `src_group`<br>= number of possible values for `addr_group`(this is >= 64) = 64</li><li>`hash2` depends on number of unique combination of `hash1%64` and `src_group`<br>= 64 * 16 (this is >= 1024)</li><li>number of possible values for `hash2%1024` = 1024</li><li>hence all 1024 buckets possible in new table</li></ol> |
+| `addr_group` is Tor/I2P/CJDNS | <ol><li>`addr_group` is Tor/I2P/CJDNS (16 possibilities) and `src_group` is IPV4/IPV6(2^16/2^32 possibilities based on IPV4/IPV6 address).</li><li>number of possible values for `hash1`<br>= number of possible values for `addr_group` * number of possible values for `src_group` (>=64)</li><li>number of possible values for `hash1%64` = 64</li><li>number of possible values for `hash1%64` for 1 `src_group` = number of possible values for `addr_group` = 16</li><li>`hash2` depends on number of unique combination of `hash1%64` and `src_group`<br>= 16 * 2^16 or 16 * 2^32 (this is >= 1024)</li><li>number of possible values for `hash2%1024` = 1024</li><li>hence all 1024 buckets possible in new table</li></ol>         | <ol><li>`addr_group` is Tor/I2P/CJDNS (16 possibilities) and `src_group` is Tor/I2P/CJDNS (16 possibilities).</li><li>number of possible values for `hash1`<br>= number of possible values for `addr_group` * number of possible values for `src_group` (>=64)</li><li>number of possible values for `hash1%64` = 64</li><li>number of possible values for `hash1%64` for 1 `src_group` = number of possible values for `addr_group` = 16</li><li>`hash2` depends on number of unique combination of `hash1%64` and `src_group`<br>= 16 * 16 (this is < 1024)</li><li>number of possible values for `hash2%1024` = 256</li><li>hence only 256 buckets possible in new table (256/1024 = 1/4 new table occupied)</li></ol>               |
 
 ### 2. tried table
 ```
