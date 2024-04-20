@@ -10,7 +10,7 @@
 we can compute `(gn - b)*G` by picking the terms we want and then summing them. this is a cheaper operation than multiplication.
 - we can implement `R = gn*G` with a method to compute and access this precomputed table.
 - definition: block, teeth, spacing refer to group of bits in a scalar and looks like:
-
+![block, teeth, spacing](./images/sdmc/sdmc_bts.jpg)
 ## [`secp256k1_ecmult_gen`](https://github.com/bitcoin-core/secp256k1/blob/4c341f89ab704205a89b5c5d404ed60f381f7c48/src/ecmult_gen_impl.h#L54): accessing the precomputed table
 
 ```
@@ -80,6 +80,7 @@ comb(d, G/2) = sum((2*d_i-1)*2^i*G/2 for i=0..263)
   - (2 ^ (block * teeth * spacing)) * (2 ^ (teeth-2)*spacing)
   - (2 ^ (block * teeth * spacing)) * (2 ^ (teeth-1)*spacing)
   ```
+  ![table construction](./images/sdmc/sdmc_table.jpg)
     </details>
 
   - we don't really need to store ds[5] since it's unused (we're only computing half table since the other half is a negation).
