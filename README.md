@@ -16,3 +16,4 @@
 | 9.    | [Writeup about implementing BIP 324 integration test](./integration_test_bip324.md) | `notes` `p2p`                   |
 | 10.   | [Signed-digit multi-comb ecmult_gen algorithm ](./sdmc.md)                          | `notes` `crypto`                |
 | 11.   | [bitcoin++ Austin 2024 slides](./btcpp_atx24.pdf)                                   | `bip324` `slides`               |
+| 12.   | [Noise protocol: NX handshake](./noise.pdf)                                         | `noise` `crypto`                |
